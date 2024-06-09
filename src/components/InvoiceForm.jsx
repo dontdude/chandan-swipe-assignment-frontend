@@ -13,6 +13,7 @@ import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import generateRandomId from "../utils/generateRandomId";
 import { useInvoiceListData } from "../redux/hooks";
+import { useProductsListData } from "../redux/hooks";
 
 const InvoiceForm = () => {
   const dispatch = useDispatch();
@@ -65,6 +66,18 @@ const InvoiceForm = () => {
         }
   );
 
+  const { productsList } = useProductsListData();
+  const [availableProducts, setAvailableProducts] = useState([]);
+
+  useEffect(() => {
+    const addedItems = formData.items.map((item) => item.id);
+    const newAvailableProducts = productsList.filter(
+      (product) => !addedItems.includes(product.id)
+    );
+    setAvailableProducts(newAvailableProducts);
+  }, [formData]);
+  
+
   useEffect(() => {
     handleCalculateTotal();
   }, []);
@@ -77,8 +90,12 @@ const InvoiceForm = () => {
     handleCalculateTotal();
   };
 
+  const isDisabled = availableProducts.length === 0;
+
   const handleAddEvent = () => {
-    const id = (+new Date() + Math.floor(Math.random() * 999999)).toString(36);
+    if(isDisabled) return;
+
+    const id = generateRandomId();
     const newItem = {
       itemId: id,
       itemName: "",
@@ -297,6 +314,8 @@ const InvoiceForm = () => {
               onRowDel={handleRowDel}
               currency={formData.currency}
               items={formData.items}
+              options={availableProducts}
+              disableAdd={isDisabled}
             />
             <Row className="mt-4 justify-content-end">
               <Col lg={6}>

@@ -1,22 +1,47 @@
 import { useSelector } from "react-redux";
 import { selectInvoiceList } from "./invoicesSlice";
+import { selectProductList } from "./productsSlice";
+
+const invoiceItemsFromProducts = (invoice, productsList) => {
+  const newInvoice = Object.fromEntries(invoice.items.map(({ id, quantity }) => [id, quantity]));
+
+  const productsForInvoice = productsList
+    .filter(({ id }) => id in newInvoice)
+    .map((product) => ({
+      ...product,
+      quantity: newInvoice[product.id],
+    }));
+
+  return { ...invoice, items: productsForInvoice };
+};
 
 export const useInvoiceListData = () => {
-  const invoiceList = useSelector(selectInvoiceList);
+  const invoices = useSelector(selectInvoiceList);
+  const invoiceList = invoices.map((invoice) =>
+    invoiceItemsFromProducts(invoice, productsList)
+  );
+  
+  const productsList = useSelector(selectProductList);
 
   const getOneInvoice = (receivedId) => {
-    return (
-      invoiceList.find(
-        (invoice) => invoice.id.toString() === receivedId.toString()
-      ) || null
-    );
-  };
+    const invoice = invoiceList.find(
+      (invoice) => invoice.id.toString() === receivedId.toString()
+    ) || null;
 
-  const listSize = invoiceList.length;
+    return invoice ? invoiceItemsFromProducts(invoice, productsList) : null;
+  };
 
   return {
     invoiceList,
     getOneInvoice,
-    listSize,
+    listSize: invoiceList.length,
+  };
+};
+
+export const useProductsListData = () => {
+  const productsList = useSelector(selectProductList);
+
+  return {
+    productsList,
   };
 };

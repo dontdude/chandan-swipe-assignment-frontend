@@ -13,7 +13,7 @@ const ProductsCard = ({ products }) => {
               <th>Product ID</th>
               <th>Name</th>
               <th>Description</th>
-              <th>Price</th>
+              <th>Price/Rate</th>
             </tr>
           </thead>
           <tbody>
@@ -22,7 +22,7 @@ const ProductsCard = ({ products }) => {
                 <td>{product.id}</td>
                 <td className="fw-normal">{product.name}</td>
                 <td className="fw-normal">{product.description}</td>
-                <td className="fw-normal">{product.price}</td>
+                <td className="fw-normal">{product.rate}</td>
               </tr>
             ))}
           </tbody>
