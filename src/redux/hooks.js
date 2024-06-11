@@ -17,11 +17,10 @@ const invoiceItemsFromProducts = (invoice, productsList) => {
 
 export const useInvoiceListData = () => {
   const invoices = useSelector(selectInvoiceList);
+  const productsList = useSelector(selectProductList);
   const invoiceList = invoices.map((invoice) =>
     invoiceItemsFromProducts(invoice, productsList)
   );
-  
-  const productsList = useSelector(selectProductList);
 
   const getOneInvoice = (receivedId) => {
     const invoice = invoiceList.find(

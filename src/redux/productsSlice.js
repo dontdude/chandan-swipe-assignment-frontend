@@ -13,7 +13,11 @@ const productsSlice = createSlice({
   ],
   reducers: {
     addProduct: (state, action) => {
-      state.push({ ...action.payload, id: generateRandomId() });
+      if(action.payload.id === 0) {
+        state.push({ ...action.payload, id: generateRandomId() });
+      } else {
+        state.push(action.payload);
+      }
     },
     // deleteProduct: (state, action) => {
     //   return state.filter((product) => product.id !== action.payload);

@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
-import { BiTrash } from "react-icons/bi";
-import EditableField from "./EditableField";
+import ItemRow from "./ItemRow";
+import ProductsModal from "./ProductsModal";
 
 const InvoiceItem = (props) => {
-  const { onItemizedItemEdit, currency, onRowDel, items, onRowAdd } = props;
+  const { onProductSelect, onItemizedItemEdit, currency, onRowDel, items, onRowAdd, products, isDisabled } = props;
+  
+  const [showModal, setShowModal] = useState(false);
 
   const itemTable = items.map((item) => (
     <ItemRow
@@ -15,8 +17,15 @@ const InvoiceItem = (props) => {
       onDelEvent={onRowDel}
       onItemizedItemEdit={onItemizedItemEdit}
       currency={currency}
+      products={products}
+      onProductSelect={onProductSelect}
     />
   ));
+
+  const handleProductSelect = (selected) => {
+    props.onProductSelect(selected);
+    setShowModal(false); 
+  }
 
   return (
     <div>
@@ -31,86 +40,19 @@ const InvoiceItem = (props) => {
         </thead>
         <tbody>{itemTable}</tbody>
       </Table>
-      <Button className="fw-bold" onClick={onRowAdd}>
+      <Button className="me-2" variant="primary" onClick={() => setShowModal(true)}>
+        Select Product Item
+      </Button>
+      <Button className={`fw-bold ${isDisabled ? "disabled" : ""}`} onClick={onRowAdd}>
         Add Item
       </Button>
+      <ProductsModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        products={products}
+        onProductSelect={handleProductSelect}
+      />
     </div>
-  );
-};
-
-const ItemRow = (props) => {
-  const onDelEvent = () => {
-    props.onDelEvent(props.item);
-  };
-  return (
-    <tr>
-      <td style={{ width: "100%" }}>
-        <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
-          cellData={{
-            type: "text",
-            name: "itemName",
-            placeholder: "Item name",
-            value: props.item.itemName,
-            id: props.item.itemId,
-          }}
-        />
-        <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
-          cellData={{
-            type: "text",
-            name: "itemDescription",
-            placeholder: "Item description",
-            value: props.item.itemDescription,
-            id: props.item.itemId,
-          }}
-        />
-      </td>
-      <td style={{ minWidth: "70px" }}>
-        <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
-          cellData={{
-            type: "number",
-            name: "itemQuantity",
-            min: 1,
-            step: "1",
-            value: props.item.itemQuantity,
-            id: props.item.itemId,
-          }}
-        />
-      </td>
-      <td style={{ minWidth: "130px" }}>
-        <EditableField
-          onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
-          }
-          cellData={{
-            leading: props.currency,
-            type: "number",
-            name: "itemPrice",
-            min: 1,
-            step: "0.01",
-            presicion: 2,
-            textAlign: "text-end",
-            value: props.item.itemPrice,
-            id: props.item.itemId,
-          }}
-        />
-      </td>
-      <td className="text-center" style={{ minWidth: "50px" }}>
-        <BiTrash
-          onClick={onDelEvent}
-          style={{ height: "33px", width: "33px", padding: "7.5px" }}
-          className="text-white mt-1 btn btn-danger"
-        />
-      </td>
-    </tr>
   );
 };
 

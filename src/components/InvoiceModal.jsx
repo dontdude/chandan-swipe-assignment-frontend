@@ -88,15 +88,15 @@ const InvoiceModal = (props) => {
                 {props.items.map((item, i) => {
                   return (
                     <tr id={i} key={i}>
-                      <td style={{ width: "70px" }}>{item.itemQuantity}</td>
+                      <td style={{ width: "70px" }}>{item.quantity}</td>
                       <td>
-                        {item.itemName} - {item.itemDescription}
+                        {item.name} - {item.description}
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
-                        {props.currency} {item.itemPrice}
+                        {props.currency} {item.rate}
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
-                        {props.currency} {item.itemPrice * item.itemQuantity}
+                        {props.currency} {item.rate * item.quantity}
                       </td>
                     </tr>
                   );
