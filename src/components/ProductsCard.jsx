@@ -5,9 +5,9 @@ import Table from "react-bootstrap/Table";
 import { Button } from "react-bootstrap";
 import { BiSolidPencil } from "react-icons/bi";
 
-const ProductsCard = ({ products }) => {
-  const handleEditClick = () => {
-    // set the selected product state in the parent component
+const ProductsCard = ({ products, onEditProduct }) => {
+  const handleEditClick = (product) => {
+    onEditProduct(product);
   };
 
   return (
@@ -31,16 +31,15 @@ const ProductsCard = ({ products }) => {
                 <td className="fw-normal">{product.description}</td>
                 <td className="fw-normal">{product.rate}</td>
                 <td>
-                <Button variant="outline-primary" onClick={handleEditClick}>
-          <div className="d-flex align-items-center justify-content-center gap-2">
-            <BiSolidPencil />
-          </div>
-        </Button>
-                  </td>
+                  <Button variant="outline-primary" onClick={() => handleEditClick(product)}>
+                    <div className="d-flex align-items-center justify-content-center gap-2">
+                      <BiSolidPencil />
+                    </div>
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
-          <tbody></tbody>
         </Table>
       </Card>
   );

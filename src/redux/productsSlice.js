@@ -8,7 +8,7 @@ const productsSlice = createSlice({
         id: generateRandomId(),
         name: `Test Product`,
         description: `Test Product Description`,
-        rate: 0.00,
+        rate: 1.00,
     }  
   ],
   reducers: {

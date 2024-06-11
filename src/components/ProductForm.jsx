@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { addProduct, updateProduct } from "../redux/productsSlice";
@@ -10,30 +10,35 @@ const initialProductState = {
   rate: "",
 };
 
-const ProductForm = () => {
+const ProductForm = ({ currentProduct, onResetProduct }) => {
   const dispatch = useDispatch();
-  const [currentProduct, setCurrentProduct] = useState(initialProductState);
+  const [product, setProduct] = useState(initialProductState);
   const [validate, setValidate] = useState(false);
+
+  useEffect(() => {
+    if (currentProduct) {
+      setProduct(currentProduct);
+    } else {
+      setProduct(initialProductState);
+    }
+  }, [currentProduct]);
 
   const handleEdit = (e) => {
     const { name, value } = e.target;
-    setCurrentProduct((prevProduct) => ({ ...prevProduct, [name]: value }));
+    setProduct((prevProduct) => ({ ...prevProduct, [name]: value }));
   };
 
-  const resetFormData = useCallback(() => {
-    setCurrentProduct(initialProductState);
-  }, []);
-
   const handleFormSubmit = () => {
-    const isValid = Object.values(currentProduct).every((value) => value !== "");
+    const isValid = Object.values(product).every((value) => value !== "");
 
     if (isValid) {
-      if (currentProduct.id === 0) {
-        dispatch(addProduct(currentProduct));
-        resetFormData();
+      if (product.id === 0) {
+        dispatch(addProduct(product));
       } else {
-        dispatch(updateProduct(currentProduct));
+        dispatch(updateProduct(product));
       }
+      onResetProduct();
+      setProduct(initialProductState);
     }
     setValidate(!isValid);
   };
@@ -46,11 +51,11 @@ const ProductForm = () => {
           <Form.Control
             name="name"
             type="text"
-            value={currentProduct.name}
+            value={product.name}
             onChange={handleEdit}
             className="bg-white border"
             placeholder="Enter name"
-            isInvalid={validate && currentProduct.name === ""}
+            isInvalid={validate && product.name === ""}
           />
         </InputGroup>
       </Form.Group>
@@ -61,11 +66,11 @@ const ProductForm = () => {
           <Form.Control
             name="description"
             type="text"
-            value={currentProduct.description}
+            value={product.description}
             onChange={handleEdit}
             className="bg-white border"
             placeholder="Enter description"
-            isInvalid={validate && currentProduct.description === ""}
+            isInvalid={validate && product.description === ""}
           />
         </InputGroup>
       </Form.Group>
@@ -79,19 +84,19 @@ const ProductForm = () => {
           <Form.Control
             name="rate"
             type="number"
-            value={currentProduct.rate}
+            value={product.rate}
             onChange={handleEdit}
             className="bg-white border"
             placeholder="0.0"
             min="0.00"
             step="0.01"
-            isInvalid={validate && currentProduct.rate === ""}
+            isInvalid={validate && product.rate === ""}
           />
         </InputGroup>
       </Form.Group>
 
       <Button variant="primary" className="d-block w-100" onClick={handleFormSubmit}>
-        {currentProduct.id === 0 ? "Add Product" : "Update Product"}
+        {product.id === 0 ? "Add Product" : "Update Product"}
       </Button>
     </div>
   );
