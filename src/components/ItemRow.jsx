@@ -60,7 +60,7 @@ const ItemRow = (props) => {
               name: "rate",
               min: 1,
               step: "0.01",
-              presicion: 2,
+              precision: 2,
               textAlign: "text-end",
               value: props.item.rate,
               id: props.item.id,

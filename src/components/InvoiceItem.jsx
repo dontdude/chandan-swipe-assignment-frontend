@@ -6,19 +6,22 @@ import ItemRow from "./ItemRow";
 import ProductsModal from "./ProductsModal";
 
 const InvoiceItem = (props) => {
-  const { onProductSelect, onItemizedItemEdit, currency, onRowDel, items, onRowAdd, products, isDisabled } = props;
+  const { onProductSelect, onItemizedItemEdit, currency, onRowDel, items, onRowAdd, products, isDisabled, convertCurrency, oldCurrency, newCurrency } = props;
   
   const [showModal, setShowModal] = useState(false);
 
   const itemTable = items.map((item) => (
     <ItemRow
       key={item.id}
-      item={item}
+      item={item} 
       onDelEvent={onRowDel}
       onItemizedItemEdit={onItemizedItemEdit}
-      currency={currency}
       products={products}
       onProductSelect={onProductSelect}
+      currency={currency}
+      convertCurrency={convertCurrency} 
+      oldCurrency={oldCurrency}
+      newCurrency={newCurrency}
     />
   ));
 

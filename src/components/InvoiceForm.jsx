@@ -8,13 +8,18 @@ import Card from "react-bootstrap/Card";
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
 import InputGroup from "react-bootstrap/InputGroup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import generateRandomId from "../utils/generateRandomId";
 import { useInvoiceListData } from "../redux/hooks";
 import { useProductsListData } from "../redux/hooks";
 import { addProduct, updateProduct } from "../redux/productsSlice";
+import {
+  fetchRates,
+  selectRates,
+  setCurrency,
+} from "../redux/currencySlice";
 
 // Default values from new item
 const defaultItem = {
@@ -42,7 +47,7 @@ const newInvoice = {
   taxAmount: "0.00",
   discountRate: "",
   discountAmount: "0.00",
-  currency: "$",
+  currency: "USD",
   items: [defaultItem],
 };
 
@@ -56,6 +61,8 @@ const InvoiceForm = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [copyId, setCopyId] = useState("");
+  const [oldCurrency, setOldCurrency] = useState("");
+  const [newCurrency, setNewCurrency] = useState("");
   const { getOneInvoice, listSize } = useInvoiceListData();
   const [formData, setFormData] = useState(
     isEdit
@@ -69,12 +76,11 @@ const InvoiceForm = () => {
   );
 
   const { productsList } = useProductsListData();
-  
+
   const addedItems = formData.items.map((item) => item.id);
   const availableProducts = productsList.filter(
     (product) => !addedItems.includes(product.id)
   );
-  
 
   useEffect(() => {
     handleCalculateTotal();
@@ -83,36 +89,40 @@ const InvoiceForm = () => {
   const handleProductSelect = (newId) => {
     setFormData((prevData) => {
       const itemExists = prevData.items.some((item) => item.id === newId);
-  
+
       if (itemExists) {
         return prevData;
       }
-  
+
       const newItem = {
         ...productsList.find((product) => product.id === newId),
-        quantity: 0,
+        quantity: 1,
       };
-  
+
       return { ...prevData, items: [newItem, ...prevData.items] };
     });
     handleCalculateTotal();
-  };  
+  };
 
   const handleRowDel = (id) => {
-    const updatedItems = formData.items.filter(
-      (item) => item.id !== id
-    );
+    const updatedItems = formData.items.filter((item) => item.id !== id);
     setFormData({ ...formData, items: updatedItems });
     handleCalculateTotal();
   };
 
   const lastItemInForm = formData.items[formData.items.length - 1];
-  const isDisabled = lastItemInForm.name === "" || lastItemInForm.quantity === 0;
+  const isDisabled =
+    lastItemInForm.name === "" || lastItemInForm.quantity === 0;
 
   const handleAddEvent = () => {
-  if(isDisabled) return;
-const currentProduct = { id: lastItemInForm.id, name: lastItemInForm.name, description: lastItemInForm.description, rate: lastItemInForm.rate} 
-  dispatch(addProduct(currentProduct));
+    if (isDisabled) return;
+    const currentProduct = {
+      id: lastItemInForm.id,
+      name: lastItemInForm.name,
+      description: lastItemInForm.description,
+      rate: lastItemInForm.rate,
+    };
+    dispatch(addProduct(currentProduct));
     setFormData({
       ...formData,
       items: [...formData.items, { ...defaultItem, id: generateRandomId() }],
@@ -123,10 +133,9 @@ const currentProduct = { id: lastItemInForm.id, name: lastItemInForm.name, descr
   const handleCalculateTotal = () => {
     setFormData((prevFormData) => {
       let subTotal = 0;
-console.log({prevFormData})
+      console.log({ prevFormData });
       prevFormData.items.forEach((item) => {
-        subTotal +=
-          parseFloat(item.rate).toFixed(2) * parseInt(item.quantity);
+        subTotal += parseFloat(item.rate).toFixed(2) * parseInt(item.quantity);
       });
 
       const taxAmount = parseFloat(
@@ -168,8 +177,30 @@ console.log({prevFormData})
     handleCalculateTotal();
   };
 
+  useEffect(() => {
+    dispatch(fetchRates());
+  }, [dispatch]);
+
+  const rates = useSelector(selectRates);
+
   const onCurrencyChange = (selectedOption) => {
+    const oldCurr = formData.currency;
+    setOldCurrency(oldCurr);
+
     setFormData({ ...formData, currency: selectedOption.currency });
+    dispatch(setCurrency(selectedOption.currency));
+    const newCurr = selectedOption.currency;
+    setNewCurrency(newCurr);
+    console.log("hv", { oldCurr, newCurr, rates });
+  };
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    if (fromCurrency === toCurrency) {
+      return amount;
+    }
+    console.log("hv1", { rates, fromCurrency, toCurrency });
+    const rate = rates[toCurrency] / rates[fromCurrency];
+    return (amount * rate).toFixed(2);
   };
 
   const openModal = (event) => {
@@ -334,6 +365,9 @@ console.log({prevFormData})
               items={formData.items}
               products={availableProducts}
               isDisabled={isDisabled}
+              convertCurrency={convertCurrency}
+              oldCurrency={oldCurrency}
+              newCurrency={newCurrency}
             />
             <Row className="mt-4 justify-content-end">
               <Col lg={6}>
@@ -440,14 +474,14 @@ console.log({prevFormData})
                 className="btn btn-light my-1"
                 aria-label="Change Currency"
               >
-                <option value="$">USD (United States Dollar)</option>
-                <option value="£">GBP (British Pound Sterling)</option>
-                <option value="¥">JPY (Japanese Yen)</option>
-                <option value="$">CAD (Canadian Dollar)</option>
-                <option value="$">AUD (Australian Dollar)</option>
-                <option value="$">SGD (Singapore Dollar)</option>
-                <option value="¥">CNY (Chinese Renminbi)</option>
-                <option value="₿">BTC (Bitcoin)</option>
+                <option value="USD">USD (United States Dollar)</option>
+                <option value="GBP">GBP (British Pound Sterling)</option>
+                <option value="JPY">JPY (Japanese Yen)</option>
+                <option value="CAD">CAD (Canadian Dollar)</option>
+                <option value="AUD">AUD (Australian Dollar)</option>
+                <option value="SGD">SGD (Singapore Dollar)</option>
+                <option value="CNY">CNY (Chinese Renminbi)</option>
+                <option value="BTC">BTC (Bitcoin)</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="my-3">
