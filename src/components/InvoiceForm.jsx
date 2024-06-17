@@ -13,7 +13,7 @@ import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import generateRandomId from "../utils/generateRandomId";
 import { useInvoiceListData, useProductsListData } from "../redux/hooks";
-import { addProduct, updateProduct } from "../redux/productsSlice";
+import { addProduct, updateProduct, updateAllProductRates } from "../redux/productsSlice";
 import {
   fetchRates,
   selectRates,
@@ -85,6 +85,16 @@ const InvoiceForm = () => {
     handleCalculateTotal();
   }, []);
 
+  useEffect(() => {
+    setFormData((prevFormData) => {
+      const updatedItems = prevFormData.items.map((item) => {
+        const updatedProduct = productsList.find((product) => product.id === item.id);
+        return updatedProduct ? updatedProduct : item;
+      });
+      return { ...prevFormData, items: updatedItems };
+    });
+  }, [productsList]);
+
   const handleProductSelect = (newId) => {
     setFormData((prevData) => {
       const itemExists = prevData.items.some((item) => item.id === newId);
@@ -120,6 +130,7 @@ const InvoiceForm = () => {
       name: lastItemInForm.name,
       description: lastItemInForm.description,
       rate: lastItemInForm.rate,
+      quantity: lastItemInForm.quantity,
     };
     dispatch(addProduct(currentProduct));
     setFormData({
@@ -182,15 +193,36 @@ const InvoiceForm = () => {
 
   const rates = useSelector(selectRates);
 
+  const currencySymbolsToCodes = {
+    "$": "USD",
+    "£": "GBP",
+    "¥": "JPY",
+    "CAD": "CAD",
+    "AUD": "AUD",
+    "SGD": "SGD",
+    "CNY": "CNY",
+    "₿": "BTC",
+  };
+
   const onCurrencyChange = (selectedOption) => {
     const oldCurr = formData.currency;
     setOldCurrency(oldCurr);
 
-    setFormData({ ...formData, currency: selectedOption.currency });
-    dispatch(setCurrency(selectedOption.currency));
     const newCurr = selectedOption.currency;
+    dispatch(setCurrency(newCurr));
     setNewCurrency(newCurr);
-    console.log("hv", { oldCurr, newCurr, rates });
+
+    const rateRatio = rates[currencySymbolsToCodes[newCurr]] / rates[currencySymbolsToCodes[oldCurr]];
+    setFormData({
+      ...formData,
+      currency: selectedOption.currency,
+      items: formData.items.map(item => ({
+        ...item,
+        rate: item.rate * rateRatio
+      }))
+    });
+    dispatch(updateAllProductRates({ ratio: rateRatio, currency: newCurr }));
+    handleCalculateTotal();
   };
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {

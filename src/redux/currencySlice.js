@@ -23,5 +23,6 @@ const currencySlice = createSlice({
 
 export const { setCurrency } = currencySlice.actions;
 export const selectRates = (state) => state.currency.rates;
+export const selectCurrentCurrency = (state) => state.currency.currentCurrency;
 
 export default currencySlice.reducer;
