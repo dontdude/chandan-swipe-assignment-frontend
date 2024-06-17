@@ -12,8 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import generateRandomId from "../utils/generateRandomId";
-import { useInvoiceListData } from "../redux/hooks";
-import { useProductsListData } from "../redux/hooks";
+import { useInvoiceListData, useProductsListData } from "../redux/hooks";
 import { addProduct, updateProduct } from "../redux/productsSlice";
 import {
   fetchRates,
@@ -47,7 +46,7 @@ const newInvoice = {
   taxAmount: "0.00",
   discountRate: "",
   discountAmount: "0.00",
-  currency: "USD",
+  currency: "$",
   items: [defaultItem],
 };
 
@@ -474,14 +473,14 @@ const InvoiceForm = () => {
                 className="btn btn-light my-1"
                 aria-label="Change Currency"
               >
-                <option value="USD">USD (United States Dollar)</option>
-                <option value="GBP">GBP (British Pound Sterling)</option>
-                <option value="JPY">JPY (Japanese Yen)</option>
-                <option value="CAD">CAD (Canadian Dollar)</option>
-                <option value="AUD">AUD (Australian Dollar)</option>
-                <option value="SGD">SGD (Singapore Dollar)</option>
-                <option value="CNY">CNY (Chinese Renminbi)</option>
-                <option value="BTC">BTC (Bitcoin)</option>
+                <option value="$">USD (United States Dollar)</option>
+                <option value="£">GBP (British Pound Sterling)</option>
+                <option value="¥">JPY (Japanese Yen)</option>
+                <option value="$">CAD (Canadian Dollar)</option>
+                <option value="$">AUD (Australian Dollar)</option>
+                <option value="$">SGD (Singapore Dollar)</option>
+                <option value="¥">CNY (Chinese Renminbi)</option>
+                <option value="₿">BTC (Bitcoin)</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="my-3">

@@ -79,7 +79,7 @@ const ProductForm = ({ currentProduct, onResetProduct }) => {
         <Form.Label className="fw-bold">Price/Rate:</Form.Label>
         <InputGroup className="my-1 flex-nowrap">
           <InputGroup.Text className="bg-light fw-bold text-secondary small">
-            USD
+            $
           </InputGroup.Text>
           <Form.Control
             name="rate"

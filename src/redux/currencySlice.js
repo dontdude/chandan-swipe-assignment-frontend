@@ -7,7 +7,7 @@ const currencySlice = createSlice({
   name: 'currency',
   initialState: {
     rates: {},
-    currentCurrency: 'USD',
+    currentCurrency: '$',
   },
   reducers: {
     setCurrency(state, action) {
