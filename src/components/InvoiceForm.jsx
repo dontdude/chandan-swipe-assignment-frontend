@@ -149,20 +149,20 @@ const InvoiceForm = () => {
       });
 
       const taxAmount = parseFloat(
-        subTotal * (prevFormData.taxRate / 100)
-      ).toFixed(2);
+        (subTotal * (prevFormData.taxRate / 100)).toFixed(2)
+      );
       const discountAmount = parseFloat(
-        subTotal * (prevFormData.discountRate / 100)
-      ).toFixed(2);
-      const total = (
-        subTotal -
+        (subTotal * (prevFormData.discountRate / 100)).toFixed(2)
+      );
+      const total = parseFloat(
+        (subTotal -
         parseFloat(discountAmount) +
-        parseFloat(taxAmount)
-      ).toFixed(2);
+        parseFloat(taxAmount)).toFixed(2)
+      );
 
       return {
         ...prevFormData,
-        subTotal: parseFloat(subTotal).toFixed(2),
+        subTotal,
         taxAmount,
         discountAmount,
         total,
@@ -193,36 +193,44 @@ const InvoiceForm = () => {
 
   const rates = useSelector(selectRates);
 
-  const currencySymbolsToCodes = {
-    "$": "USD",
-    "£": "GBP",
-    "¥": "JPY",
-    "CAD": "CAD",
-    "AUD": "AUD",
-    "SGD": "SGD",
-    "CNY": "CNY",
-    "₿": "BTC",
+  const currencyCodesToSymbols = {
+    "USD": "$",
+    "GBP": "£",
+    "JPY": "¥",
+    "CAD": "$",
+    "AUD": "$",
+    "SGD": "$",
+    "CNY": "¥",
+    "BTC": "₿"
   };
 
   const onCurrencyChange = (selectedOption) => {
     const oldCurr = formData.currency;
+    const oldCurrCode = Object.keys(currencyCodesToSymbols).find(
+      (key) => currencyCodesToSymbols[key] === oldCurr
+    );
     setOldCurrency(oldCurr);
 
-    const newCurr = selectedOption.currency;
+    const newCurrCode = selectedOption.currencyCode;
+    const newCurr = currencyCodesToSymbols[newCurrCode];
+
     dispatch(setCurrency(newCurr));
     setNewCurrency(newCurr);
-
-    const rateRatio = rates[currencySymbolsToCodes[newCurr]] / rates[currencySymbolsToCodes[oldCurr]];
+    const rateRatio = rates[newCurrCode] / rates[oldCurrCode];
+    console.log("hv30", { formData })
     setFormData({
       ...formData,
-      currency: selectedOption.currency,
+      currency: newCurr,
       items: formData.items.map(item => ({
         ...item,
         rate: item.rate * rateRatio
       }))
     });
+    console.log("hv2", { rateRatio, newCurr, oldCurr, oldCurrCode, newCurrCode});
     dispatch(updateAllProductRates({ ratio: rateRatio, currency: newCurr }));
+    console.log("hv31", { formData })
     handleCalculateTotal();
+    console.log("hv32", { formData })
   };
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
@@ -500,19 +508,19 @@ const InvoiceForm = () => {
               <Form.Label className="fw-bold">Currency:</Form.Label>
               <Form.Select
                 onChange={(event) =>
-                  onCurrencyChange({ currency: event.target.value })
+                  onCurrencyChange({ currencyCode: event.target.value })
                 }
                 className="btn btn-light my-1"
                 aria-label="Change Currency"
               >
-                <option value="$">USD (United States Dollar)</option>
-                <option value="£">GBP (British Pound Sterling)</option>
-                <option value="¥">JPY (Japanese Yen)</option>
-                <option value="$">CAD (Canadian Dollar)</option>
-                <option value="$">AUD (Australian Dollar)</option>
-                <option value="$">SGD (Singapore Dollar)</option>
-                <option value="¥">CNY (Chinese Renminbi)</option>
-                <option value="₿">BTC (Bitcoin)</option>
+                <option value="USD">USD (United States Dollar)</option>
+                <option value="GBP">GBP (British Pound Sterling)</option>
+                <option value="JPY">JPY (Japanese Yen)</option>
+                <option value="CAD">CAD (Canadian Dollar)</option>
+                <option value="AUD">AUD (Australian Dollar)</option>
+                <option value="SGD">SGD (Singapore Dollar)</option>
+                <option value="CNY">CNY (Chinese Renminbi)</option>
+                <option value="BTC">BTC (Bitcoin)</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="my-3">

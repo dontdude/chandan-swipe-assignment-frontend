@@ -34,7 +34,6 @@ const productsSlice = createSlice({
     updateAllProductRates: (state, action) => {
       state.forEach(product => {
         product.rate = (action.payload.ratio * product.rate).toFixed(2);
-        product.currency = action.payload.currency;
       });
     },
   },

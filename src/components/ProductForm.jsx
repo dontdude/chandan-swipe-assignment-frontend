@@ -27,13 +27,6 @@ const ProductForm = ({ currentProduct, onResetProduct }) => {
     }
   }, [currentProduct]);
 
-  useEffect(() => {
-  setProduct((prevProduct) => ({
-    ...prevProduct,
-    currency: selectedCurrentCurrency
-  }));
-}, [selectedCurrentCurrency]);
-
   const handleEdit = (e) => {
     const { name, value } = e.target;
     setProduct((prevProduct) => ({ ...prevProduct, [name]: value }));

@@ -17,6 +17,7 @@ const ProductsModal = ({ show, onHide, products, onProductSelect }) => {
     if (selectedProductId !== null) {
       onProductSelect(selectedProductId);
     }
+    setSelectedProductId(null);
   };
 
   return (
@@ -38,7 +39,7 @@ const ProductsModal = ({ show, onHide, products, onProductSelect }) => {
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
+              {products.length > 0 ? products.map((product) => (
                 <tr key={product.id}>
                   <td>
                     <Form.Check
@@ -54,16 +55,16 @@ const ProductsModal = ({ show, onHide, products, onProductSelect }) => {
                   <td className="fw-normal">{product.description}</td>
                   <td className="fw-normal">{product.rate}</td>
                 </tr>
-              ))}
+              )) : 'Add a product from products page or a new custom product.'}
             </tbody>
           </Table>
         </Card>
       </Modal.Body>
       <Modal.Footer>
-        <Button className="px-4 py-2" variant="secondary" onClick={onHide}>
+        {/* <Button className="px-4 py-2" variant="secondary" onClick={onHide}>
           Close
-        </Button>
-        <Button className="px-4 py-2" variant="primary" onClick={handleSelectClick}>
+        </Button> */}
+        <Button className={`px-4 py-2 ${!selectedProductId ? "disabled" : ""}`} variant="primary" onClick={handleSelectClick}>
           Select
         </Button>
       </Modal.Footer>
