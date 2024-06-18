@@ -47,7 +47,7 @@ const InvoiceItem = (props) => {
         Select Product Item
       </Button>
       <Button className={`fw-bold ${isDisabled ? "disabled" : ""}`} onClick={onRowAdd}>
-        Add Item
+        Add Custom Product Item
       </Button>
       <ProductsModal
         show={showModal}

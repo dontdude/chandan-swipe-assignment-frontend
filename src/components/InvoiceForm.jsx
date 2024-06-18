@@ -12,9 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import generateRandomId from "../utils/generateRandomId";
-import { useInvoiceListData } from "../redux/hooks";
-import { useProductsListData } from "../redux/hooks";
-import { addProduct, updateProduct } from "../redux/productsSlice";
+import { useInvoiceListData, useProductsListData } from "../redux/hooks";
+import { addProduct, updateProduct, updateAllProductRates } from "../redux/productsSlice";
 import {
   fetchRates,
   selectRates,
@@ -47,7 +46,7 @@ const newInvoice = {
   taxAmount: "0.00",
   discountRate: "",
   discountAmount: "0.00",
-  currency: "USD",
+  currency: "$",
   items: [defaultItem],
 };
 
@@ -86,6 +85,16 @@ const InvoiceForm = () => {
     handleCalculateTotal();
   }, []);
 
+  useEffect(() => {
+    setFormData((prevFormData) => {
+      const updatedItems = prevFormData.items.map((item) => {
+        const updatedProduct = productsList.find((product) => product.id === item.id);
+        return updatedProduct ? updatedProduct : item;
+      });
+      return { ...prevFormData, items: updatedItems };
+    });
+  }, [productsList]);
+
   const handleProductSelect = (newId) => {
     setFormData((prevData) => {
       const itemExists = prevData.items.some((item) => item.id === newId);
@@ -121,6 +130,7 @@ const InvoiceForm = () => {
       name: lastItemInForm.name,
       description: lastItemInForm.description,
       rate: lastItemInForm.rate,
+      quantity: lastItemInForm.quantity,
     };
     dispatch(addProduct(currentProduct));
     setFormData({
@@ -139,20 +149,20 @@ const InvoiceForm = () => {
       });
 
       const taxAmount = parseFloat(
-        subTotal * (prevFormData.taxRate / 100)
-      ).toFixed(2);
+        (subTotal * (prevFormData.taxRate / 100)).toFixed(2)
+      );
       const discountAmount = parseFloat(
-        subTotal * (prevFormData.discountRate / 100)
-      ).toFixed(2);
-      const total = (
-        subTotal -
+        (subTotal * (prevFormData.discountRate / 100)).toFixed(2)
+      );
+      const total = parseFloat(
+        (subTotal -
         parseFloat(discountAmount) +
-        parseFloat(taxAmount)
-      ).toFixed(2);
+        parseFloat(taxAmount)).toFixed(2)
+      );
 
       return {
         ...prevFormData,
-        subTotal: parseFloat(subTotal).toFixed(2),
+        subTotal,
         taxAmount,
         discountAmount,
         total,
@@ -183,15 +193,44 @@ const InvoiceForm = () => {
 
   const rates = useSelector(selectRates);
 
+  const currencyCodesToSymbols = {
+    "USD": "$",
+    "GBP": "£",
+    "JPY": "¥",
+    "CAD": "$",
+    "AUD": "$",
+    "SGD": "$",
+    "CNY": "¥",
+    "BTC": "₿"
+  };
+
   const onCurrencyChange = (selectedOption) => {
     const oldCurr = formData.currency;
+    const oldCurrCode = Object.keys(currencyCodesToSymbols).find(
+      (key) => currencyCodesToSymbols[key] === oldCurr
+    );
     setOldCurrency(oldCurr);
 
-    setFormData({ ...formData, currency: selectedOption.currency });
-    dispatch(setCurrency(selectedOption.currency));
-    const newCurr = selectedOption.currency;
+    const newCurrCode = selectedOption.currencyCode;
+    const newCurr = currencyCodesToSymbols[newCurrCode];
+
+    dispatch(setCurrency(newCurr));
     setNewCurrency(newCurr);
-    console.log("hv", { oldCurr, newCurr, rates });
+    const rateRatio = rates[newCurrCode] / rates[oldCurrCode];
+    console.log("hv30", { formData })
+    setFormData({
+      ...formData,
+      currency: newCurr,
+      items: formData.items.map(item => ({
+        ...item,
+        rate: item.rate * rateRatio
+      }))
+    });
+    console.log("hv2", { rateRatio, newCurr, oldCurr, oldCurrCode, newCurrCode});
+    dispatch(updateAllProductRates({ ratio: rateRatio, currency: newCurr }));
+    console.log("hv31", { formData })
+    handleCalculateTotal();
+    console.log("hv32", { formData })
   };
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
@@ -469,7 +508,7 @@ const InvoiceForm = () => {
               <Form.Label className="fw-bold">Currency:</Form.Label>
               <Form.Select
                 onChange={(event) =>
-                  onCurrencyChange({ currency: event.target.value })
+                  onCurrencyChange({ currencyCode: event.target.value })
                 }
                 className="btn btn-light my-1"
                 aria-label="Change Currency"

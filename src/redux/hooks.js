@@ -11,7 +11,7 @@ const invoiceItemsFromProducts = (invoice, productsList) => {
       ...product,
       quantity: newInvoice[product.id],
     }));
-
+    console.log("newInvoice", { ...invoice, items: productsForInvoice })
   return { ...invoice, items: productsForInvoice };
 };
 

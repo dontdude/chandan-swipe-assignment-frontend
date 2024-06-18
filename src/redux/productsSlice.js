@@ -8,7 +8,8 @@ const productsSlice = createSlice({
         id: generateRandomId(),
         name: `Test Product`,
         description: `Test Product Description`,
-        rate: 1.00,
+        rate: 1,
+        quantity: 1,
     }  
   ],
   reducers: {
@@ -30,9 +31,14 @@ const productsSlice = createSlice({
         state[index] = action.payload;
       }
     },
+    updateAllProductRates: (state, action) => {
+      state.forEach(product => {
+        product.rate = (action.payload.ratio * product.rate).toFixed(2);
+      });
+    },
   },
 });
 
-export const { addProduct, updateProduct } = productsSlice.actions;
+export const { addProduct, updateProduct, updateAllProductRates } = productsSlice.actions;
 export const selectProductList = (state) => state.products;
 export default productsSlice.reducer;

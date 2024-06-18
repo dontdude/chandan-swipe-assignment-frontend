@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateProduct } from "../redux/productsSlice";
+import { selectCurrentCurrency } from "../redux/currencySlice";
 
 const initialProductState = {
   id: 0,
   name: "",
   description: "",
-  rate: "",
+  rate: 0,
+  quantity: 1,
 };
 
 const ProductForm = ({ currentProduct, onResetProduct }) => {
+  const selectedCurrentCurrency = useSelector(selectCurrentCurrency);
+
   const dispatch = useDispatch();
   const [product, setProduct] = useState(initialProductState);
   const [validate, setValidate] = useState(false);
@@ -79,7 +83,7 @@ const ProductForm = ({ currentProduct, onResetProduct }) => {
         <Form.Label className="fw-bold">Price/Rate:</Form.Label>
         <InputGroup className="my-1 flex-nowrap">
           <InputGroup.Text className="bg-light fw-bold text-secondary small">
-            USD
+          {selectedCurrentCurrency}
           </InputGroup.Text>
           <Form.Control
             name="rate"
@@ -95,8 +99,10 @@ const ProductForm = ({ currentProduct, onResetProduct }) => {
         </InputGroup>
       </Form.Group>
 
-      <Button variant="primary" className="d-block w-100" onClick={handleFormSubmit}>
+      <Button variant="primary" className="w-100" onClick={handleFormSubmit}>
+        <div className="d-block w-100">
         {product.id === 0 ? "Add Product" : "Update Product"}
+        </div>
       </Button>
     </div>
   );
